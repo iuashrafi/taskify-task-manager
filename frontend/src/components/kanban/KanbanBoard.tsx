@@ -17,16 +17,23 @@ import {
   updateColumnOrder,
   updateTask,
 } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 interface KanbanBoardProps {
   initialColumns: Column[];
 }
 
 export function KanbanBoard({ initialColumns }: KanbanBoardProps) {
+  const queryClient = useQueryClient();
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [tasks, setTasks] = useState<Task[]>(
     initialColumns.flatMap((col) => col.tasks || [])
   );
+
+  useEffect(() => {
+    setColumns(initialColumns);
+  }, [initialColumns]);
 
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
 
@@ -91,7 +98,7 @@ export function KanbanBoard({ initialColumns }: KanbanBoardProps) {
           await updateColumnOrder(newColumns);
         } catch (error: any) {
           console.error("Failed to update column order:", error);
-          // Revert if API call fails
+          // revert
           setColumns(columns);
           alert(`Failed to save column order: ${error.message}`);
         }
@@ -206,17 +213,24 @@ export function KanbanBoard({ initialColumns }: KanbanBoardProps) {
     };
 
     try {
-      const createdTask = await createTask(newTask);
-      setTasks((prev) => [
-        ...prev,
-        {
-          ...createdTask,
-          id: createdTask._id || createdTask.id,
-          columnId: createdTask.column || createdTask.columnId,
-        },
-      ]);
+      await createTask(newTask);
+      toast.success("Task created!");
+      // setTasks((prev) => [
+      //   ...prev,
+      //   {
+      //     ...createdTask,
+      //     id: createdTask._id || createdTask.id,
+      //     columnId: createdTask.column || createdTask.columnId,
+      //   },
+      // ]);
+
+      // instead - invalidate it
+      queryClient.invalidateQueries({
+        queryKey: ["columns"],
+      });
     } catch (error) {
       console.error("Failed to create task:", error);
+      toast.error("Failed to create task!");
     }
   };
 

@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CreateTaskForm } from "./create-task-form";
 import { Plus } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CreateTaskModalInterface {
   columnId?: string | undefined;
@@ -44,6 +45,7 @@ export const CreateTaskModal = ({
   onUpdateTask,
   trigger,
 }: CreateTaskModalInterface) => {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
   const handleSubmit = (data: any) => {
@@ -55,8 +57,14 @@ export const CreateTaskModal = ({
         priority: data.priority,
       });
       onUpdateTask(task.id, data.title, data.content, data.priority);
+      queryClient.invalidateQueries({
+        queryKey: ["columns"],
+      });
     } else if (onAddTask) {
       onAddTask(columnId, data.title, data.content, data.priority);
+      queryClient.invalidateQueries({
+        queryKey: ["columns"],
+      });
     }
     setOpen(false);
   };

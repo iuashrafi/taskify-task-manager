@@ -6,12 +6,14 @@ import { CSS } from "@dnd-kit/utilities";
 import { Task } from "@/lib/types";
 import { CreateTaskModal } from "./create-task-modal";
 import { deleteTask, updateTask } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface KanbanTaskItemProps {
   task: Task;
 }
 
 export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
+  const queryClient = useQueryClient();
   const {
     setNodeRef,
     attributes,
@@ -85,8 +87,7 @@ export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
               if (confirmed) {
                 deleteTask(task.id.toString())
                   .then(() => {
-                    // Call your refetch or update local state
-                    // refetchTasks(); // or remove it from local state
+                    queryClient.invalidateQueries({ queryKey: ["columns"] });
                   })
                   .catch((error: any) => {
                     console.error("Failed to delete task:", error);

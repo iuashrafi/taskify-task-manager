@@ -2,63 +2,55 @@ import { CreateColumnModal } from "@/components/kanban/create-column-modal";
 import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import { Column } from "@/lib/types";
 import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+const fetchColumns = async () => {
+  const res = await api.get("/column");
+  const data = res.data;
+
+  return data.map((column: any) => ({
+    id: column._id,
+    _id: column._id,
+    title: column.title,
+    order: column.order,
+    tasks: column.tasks.map((task: any) => ({
+      id: task._id,
+      _id: task._id,
+      title: task.title,
+      content: task.content,
+      columnId: column._id,
+      column: task.column,
+      is_completed: task.is_completed,
+      order: task.order,
+      priority: task.priority,
+    })),
+  }));
+};
 
 const Board = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [columns, setColumns] = useState<Column[]>([]);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    api
-      .get("/column")
-      .then((res) => {
-        const data = res.data;
-        console.log("columns fetched = ", data);
+  const { data: columns, isLoading } = useQuery({
+    queryKey: ["columns"],
+    queryFn: fetchColumns,
+  });
 
-        const transformedColumns = data.map((column: any) => ({
-          id: column._id,
-          _id: column._id,
-          title: column.title,
-          order: column.order,
-          tasks: column.tasks.map((task: any) => ({
-            id: task._id,
-            _id: task._id,
-            title: task.title,
-            content: task.content,
-            columnId: column._id,
-            column: task.column,
-            is_completed: task.is_completed,
-            order: task.order,
-            priority: task.priority,
-          })),
-        }));
-
-        setColumns(transformedColumns);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log("error = ", err);
-      });
-  }, []);
-
-  if (loading) return <div>Loading Board Data....</div>;
+  if (isLoading) return <div>Loading Board Data...</div>;
 
   return (
     <div>
       <div className="bg-white py-2 px-4 border-b flex items-center justify-between">
-        <div>{/* Due Date | Priority | Filters  */}</div>
+        <div></div>
         <CreateColumnModal
           trigger={
             <Button variant="default" size="sm" className="text-sm">
               <Plus size={16} /> Add Column
             </Button>
           }
-          onCreate={() => {}}
         />
       </div>
-      <div className="">
+      <div>
         <KanbanBoard initialColumns={columns} />
       </div>
     </div>

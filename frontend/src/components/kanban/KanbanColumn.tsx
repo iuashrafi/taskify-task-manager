@@ -17,6 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface KanbanColumnProps {
   column: Column;
@@ -34,6 +35,7 @@ export const KanbanColumn = ({
   tasks,
   onAddTask,
 }: KanbanColumnProps) => {
+  const queryClient = useQueryClient();
   const tasksIds = useMemo(() => {
     return tasks.map((task: any) => task.id);
   }, [tasks]);
@@ -110,6 +112,9 @@ export const KanbanColumn = ({
                   if (confirmed) {
                     deleteColumn(column.id.toString())
                       .then(() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["columns"],
+                        });
                         toast.success("Column deleted");
                       })
                       .catch((error) => {
@@ -124,46 +129,6 @@ export const KanbanColumn = ({
           </DropdownMenu>
           <CreateTaskModal columnId={column._id} onAddTask={onAddTask} />
         </div>
-        {/* <div className="flex items-center space-x-1.5">
-          <Ellipsis size={16} color="#4b4d4d" fill="#4b4d4d" />
-          <Button
-            variant="ghost"
-            className="bg-red-100 p-1 h-auto"
-            onClick={() => {
-              const confirmed = window.confirm(
-                "Are you sure you want to delete this column and all its tasks?"
-              );
-              if (confirmed) {
-                deleteColumn(column._id?.toString())
-                  .then(() => {
-                    // toast({ description: "Column deleted" });
-                    // refetchColumns(); // or remove from local state
-                  })
-                  .catch((error) => {
-                    console.error("Failed to delete column:", error);
-                  });
-              }
-            }}
-          >
-            <Trash2 size={14} className="text-red-500" />
-          </Button>
-          <CreateColumnModal
-            columnId={column._id}
-            initialTitle={column.title}
-            trigger={
-              <Button variant="ghost" size="icon">
-                <Pencil size={14} />
-              </Button>
-            }
-            onUpdate={(newTitle) => {
-              console.log("Renamed to", newTitle);
-              // Update UI or trigger re-fetch
-              toast.success("Column Renamed!");
-            }}
-          />
-
-          <CreateTaskModal columnId={column._id} onAddTask={onAddTask} />
-        </div> */}
       </CardHeader>
 
       <ScrollArea className="flex-1 min-h-0">

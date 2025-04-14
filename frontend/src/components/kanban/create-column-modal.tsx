@@ -10,11 +10,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { createColumn, updateColumn } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const CreateColumnModal = ({
   trigger,
-  onCreate,
-  onUpdate,
   columnId,
   initialTitle = "",
 }: {
@@ -24,6 +23,7 @@ export const CreateColumnModal = ({
   columnId?: string;
   initialTitle?: string;
 }) => {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [loading, setLoading] = useState(false);
@@ -44,10 +44,10 @@ export const CreateColumnModal = ({
     try {
       if (columnId) {
         await updateColumn(columnId, { title });
-        onUpdate?.(title);
+        queryClient.invalidateQueries({ queryKey: ["columns"] });
       } else {
         await createColumn({ title });
-        onCreate?.();
+        queryClient.invalidateQueries({ queryKey: ["columns"] });
       }
       setOpen(false);
       setTitle("");
