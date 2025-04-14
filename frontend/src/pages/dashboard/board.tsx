@@ -3,7 +3,7 @@ import { KanbanBoard } from "@/components/kanban/KanbanBoard";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { Plus } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const fetchColumns = async () => {
   const res = await api.get("/column");
@@ -29,8 +29,6 @@ const fetchColumns = async () => {
 };
 
 const Board = () => {
-  const queryClient = useQueryClient();
-
   const { data: columns, isLoading } = useQuery({
     queryKey: ["columns"],
     queryFn: fetchColumns,
