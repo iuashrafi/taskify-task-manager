@@ -32,7 +32,12 @@ exports.register = async (req, res) => {
       maxAge: 60 * 60 * 1000, // 60 min * 60 seconds
     });
 
-    res.status(201).json({ userId: user._id, username: user.username, email : user.email, projectName : user.projectName });
+    res.status(201).json({
+      userId: user._id,
+      username: user.username,
+      email: user.email,
+      projectName: user.projectName,
+    });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong!" });
   }
@@ -58,11 +63,16 @@ exports.login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // must be true on https
-      sameSite: process.env.NODE_ENV === 'production' ? "none" :  "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 60 * 60 * 1000,
     });
 
-    res.status(200).json({ userId: user._id, username: user.username , email : user.email, projectName : user.projectName});
+    res.status(200).json({
+      userId: user._id,
+      username: user.username,
+      email: user.email,
+      projectName: user.projectName,
+    });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
   }

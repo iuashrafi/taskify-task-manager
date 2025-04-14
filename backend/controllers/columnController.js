@@ -1,16 +1,15 @@
 const ColumnModel = require("../models/ColumnModel");
 const TaskModel = require("../models/TaskModel");
 
-// testing done
 exports.createColumn = async (req, res) => {
   try {
-    const { userId } = req.user ;
+    const { userId } = req.user;
     const { title } = req.body;
-    const columnCount  = await ColumnModel.countDocuments({ user : userId});
+    const columnCount = await ColumnModel.countDocuments({ user: userId });
     const col = new ColumnModel({
       title,
-      order : columnCount,
-      user : userId
+      order: columnCount,
+      user: userId,
     });
 
     await col.save();
@@ -23,19 +22,19 @@ exports.createColumn = async (req, res) => {
   }
 };
 
-// tested
 exports.getColumnsWithTasks = async (req, res) => {
   try {
-    const { userId  } = req.user ; 
+    const { userId } = req.user;
     const columns = await ColumnModel.find({
-      user : userId
+      user: userId,
     }).sort("order");
 
     const columnsWithTasks = await Promise.all(
       columns.map(async (column) => {
-        const tasks = await TaskModel.find({ column: column._id, user : userId }).sort(
-          "order"
-        );
+        const tasks = await TaskModel.find({
+          column: column._id,
+          user: userId,
+        }).sort("order");
         return {
           ...column.toObject(),
           tasks,
@@ -43,7 +42,7 @@ exports.getColumnsWithTasks = async (req, res) => {
       })
     );
 
-     res.send(columnsWithTasks);
+    res.send(columnsWithTasks);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -51,17 +50,12 @@ exports.getColumnsWithTasks = async (req, res) => {
 
 exports.reorderColumns = async (req, res) => {
   try {
-    console.log("Received body:", req.body); // Add this line
-    console.log("Type of body:", typeof req.body); // And this line
-
     const updates = req.body;
 
-    // Validate input
     if (!Array.isArray(updates)) {
       return res.status(400).send({ message: "Expected an array of updates" });
     }
 
-    // Process updates
     await Promise.all(
       updates.map(async (update) => {
         if (!update.id || typeof update.order !== "number") {
@@ -84,36 +78,35 @@ exports.deleteColumn = async (req, res) => {
   try {
     const columnId = req.params.id;
 
-    // Check if column exists
     const column = await ColumnModel.findById(columnId);
     if (!column) {
       return res.status(404).json({ message: "Column not found" });
     }
 
-    // Delete the column
     await ColumnModel.findByIdAndDelete(columnId);
 
-    // Delete all tasks associated with this column
     await TaskModel.deleteMany({ column: columnId });
 
-    res.status(200).json({ message: "Column and associated tasks deleted successfully" });
+    res
+      .status(200)
+      .json({ message: "Column and associated tasks deleted successfully" });
   } catch (error) {
     console.error("Error deleting column", error);
     res.status(500).json({ message: "Failed to delete column" });
   }
 };
 
-exports.updateColumn = async (req, res)=>{
+exports.updateColumn = async (req, res) => {
   try {
     const columnId = req.params.id;
     const { title } = req.body;
-    await ColumnModel.findByIdAndUpdate(columnId , {
-      title 
+    await ColumnModel.findByIdAndUpdate(columnId, {
+      title,
     });
-  
+
     res.status(200).json({
-      success : true, 
-      message  : "Column renamed successfully!"
+      success: true,
+      message: "Column renamed successfully!",
     });
   } catch (error) {
     console.log("Error occurred while renaming a Column", error);
@@ -121,4 +114,4 @@ exports.updateColumn = async (req, res)=>{
       message: "Error occured while renaming a Column in db",
     });
   }
-}
+};
