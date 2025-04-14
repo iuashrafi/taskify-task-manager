@@ -91,7 +91,7 @@ export const CreateTaskModal = ({
               ? {
                   title: task.title,
                   content: task.content,
-                  priority: task.priority,
+                  priority: task.priority as "Normal" | "Medium" | "High",
                 }
               : undefined
           }
