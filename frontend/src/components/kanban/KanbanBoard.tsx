@@ -4,6 +4,9 @@ import {
   DragEndEvent,
   DragOverEvent,
   DragStartEvent,
+  MouseSensor,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
 
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
@@ -29,6 +32,14 @@ export function KanbanBoard({ initialColumns }: KanbanBoardProps) {
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [tasks, setTasks] = useState<Task[]>(
     initialColumns.flatMap((col) => col.tasks || [])
+  );
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 1,
+      },
+    })
   );
 
   useEffect(() => {
@@ -236,6 +247,7 @@ export function KanbanBoard({ initialColumns }: KanbanBoardProps) {
 
   return (
     <DndContext
+      sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
