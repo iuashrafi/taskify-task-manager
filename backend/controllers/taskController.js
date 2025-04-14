@@ -1,19 +1,26 @@
 const ColumnModel = require("../models/ColumnModel");
 const TaskModel = require("../models/TaskModel");
 
+// tested
 exports.createTask = async (req, res) => {
   try {
-    const { title, content, columnId } = req.body;
+    const {userId} = req.user; 
 
-    const column = await ColumnModel.findOne({_id : columnId});
-    if(!column){
-      throw new Error("Column doesnt exists!")
+    const { title, content, columnId, priority } = req.body;
+
+    const column = await ColumnModel.findOne({ _id: columnId, user : userId });
+    if (!column) {
+      throw new Error("Column doesnt exists!");
     }
+
+    const taskCount = await TaskModel.countDocuments({ column , user: userId });
 
     const task = new TaskModel({
       title,
       content,
-      column  
+      column,
+      order: taskCount,priority,
+      user : userId
     });
 
     await task.save();
@@ -24,5 +31,20 @@ exports.createTask = async (req, res) => {
     res.status(500).json({
       message: "Error creating task in db",
     });
+  }
+};
+
+
+ // tested
+exports.deleteTask = async (req, res) => {
+  try { 
+    const task = await TaskModel.findByIdAndDelete(req.params.id);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    res.status(200).json({ message: "Task deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting task", error);
+    res.status(500).json({ message: "Failed to delete task" });
   }
 };

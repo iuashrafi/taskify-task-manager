@@ -2,16 +2,19 @@ const mongoose = require("mongoose");
 
 const ColumnSchema = new mongoose.Schema({
   title: {
-    type : String,
-    required : [ true, 'Title is required']
-},
-tasks : [{
-    type : mongoose.Schema.Types.ObjectId, ref : 'Task'
-}]
-  
-  // user_id
+    type: String,
+    required: [true, "Title is required"],
+  },
+  order: {
+    type: Number,
+    default: 0,
+    index : true,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
 });
 
-const ColumnModel = mongoose.model("Column", ColumnSchema);
-
-module.exports = ColumnModel;
+module.exports = mongoose.model("Column", ColumnSchema);
