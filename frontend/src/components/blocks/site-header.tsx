@@ -5,11 +5,13 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { UserDropdown } from "../user-dropdown";
 import { updateProjectName } from "@/lib/api";
 import TextareaAutosize from "react-textarea-autosize";
+import toast from "react-hot-toast";
 
 export function SiteHeader({ title: initialTitle }: { title: string }) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [isLoading, setIsLoading] = useState(false);
+  // @ts-ignore
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -51,14 +53,13 @@ export function SiteHeader({ title: initialTitle }: { title: string }) {
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
-      await updateProjectName(title.trim());
+      await updateProjectName({ projectName: title.trim() });
       setIsEditing(false);
     } catch (err) {
-      setError("Failed to update project name");
-      setTitle(initialTitle); // Revert to original title
+      toast.error("Failed to rename");
+      setTitle(initialTitle); // revert
     } finally {
       setIsLoading(false);
     }
@@ -100,28 +101,6 @@ export function SiteHeader({ title: initialTitle }: { title: string }) {
                 autoFocus
                 disabled={isLoading}
               />
-              {/* <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="h-8 w-auto outline-none border-b"
-                autoFocus
-                disabled={isLoading}
-              />   <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSave}
-                disabled={isLoading}
-              >
-                <Check size={16} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCancel}
-                disabled={isLoading}
-              >
-                <X size={16} />
-              </Button> */}
             </div>
           ) : (
             <div
@@ -133,8 +112,6 @@ export function SiteHeader({ title: initialTitle }: { title: string }) {
             </div>
           )}
         </div>
-
-        {error && <div className="text-red-500 text-sm ml-2">{error}</div>}
 
         <div className="ml-auto">
           <UserDropdown />

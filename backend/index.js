@@ -42,6 +42,7 @@ app.get("/", (req, res) => {
 app.use("/api/task", authenticateUser, require("./routes/taskRoutes"));
 app.use("/api/column", authenticateUser, require("./routes/columnRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/user", authenticateUser, require("./routes/userRoutes"));
 
 app.listen(PORT, () => {
   console.log(`Example app listening on PORT ${PORT}`);

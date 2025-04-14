@@ -76,27 +76,3 @@ exports.reorderTasksWithinCol = async (req, res) => {
     res.status(400).send(error);
   }
 };
-
-exports.renameProject = async (req, res) => {
-  try {
-    const { projectName } = req.body;
-    const userId = req.user.userId;
-
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      userId,
-      { projectName },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Project name updated",
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error updating project name", error });
-  }
-};

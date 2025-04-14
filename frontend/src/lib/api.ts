@@ -121,9 +121,13 @@ export const deleteColumn = async (columnId: string) => {
   }
 };
 
-export const updateProjectName = async (projectName: string) => {
+export const updateProjectName = async ({
+  projectName,
+}: {
+  projectName: string;
+}) => {
   try {
-    const response = await api.patch(`/task/projectName`, {
+    const response = await api.patch(`/user/rename`, {
       projectName,
     });
     return response.data;
