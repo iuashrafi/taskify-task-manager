@@ -32,7 +32,7 @@ exports.register = async (req, res) => {
       maxAge: 60 * 60 * 1000, // 60 min * 60 seconds
     });
 
-    res.status(201).json({ userId: user._id, username: user.username });
+    res.status(201).json({ userId: user._id, username: user.username, email : user.email, projectName : user.projectName });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong!" });
   }
@@ -62,7 +62,7 @@ exports.login = async (req, res) => {
       maxAge: 60 * 60 * 1000,
     });
 
-    res.status(200).json({ userId: user._id, username: user.username });
+    res.status(200).json({ userId: user._id, username: user.username , email : user.email, projectName : user.projectName});
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
   }

@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { createColumn, updateColumn } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 export const CreateColumnModal = ({
   trigger,
@@ -45,9 +46,11 @@ export const CreateColumnModal = ({
       if (columnId) {
         await updateColumn(columnId, { title });
         queryClient.invalidateQueries({ queryKey: ["columns"] });
+        toast.success("Column renamed!");
       } else {
         await createColumn({ title });
         queryClient.invalidateQueries({ queryKey: ["columns"] });
+        toast.success("Column added!");
       }
       setOpen(false);
       setTitle("");

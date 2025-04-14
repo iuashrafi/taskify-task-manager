@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -10,76 +9,122 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+const TaskFormSchema = z.object({
+  title: z.string().min(1, { message: "Title is required" }),
+  content: z.string().min(1, { message: "Content is required" }),
+  priority: z.enum(["Normal", "Medium", "High"], {
+    required_error: "Priority is required",
+  }),
+});
+
+type TaskFormValues = z.infer<typeof TaskFormSchema>;
 
 interface CreateTaskFormProps {
-  onSubmit: (data: any) => void;
-  initialValues?: {
-    title: string;
-    content: string;
-    priority: string;
-  };
+  onSubmit: (data: TaskFormValues) => void;
+  initialValues?: TaskFormValues;
 }
 
 export const CreateTaskForm = ({
   onSubmit,
   initialValues,
 }: CreateTaskFormProps) => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [priority, setPriority] = useState("Normal");
+  const form = useForm<TaskFormValues>({
+    resolver: zodResolver(TaskFormSchema),
+    defaultValues: {
+      title: initialValues?.title ?? "",
+      content: initialValues?.content ?? "",
+      priority: initialValues?.priority ?? "Normal",
+    },
+  });
+
+  const { reset } = form;
 
   useEffect(() => {
     if (initialValues) {
-      setTitle(initialValues.title);
-      setContent(initialValues.content);
-      setPriority(initialValues.priority);
+      reset(initialValues);
     }
-  }, [initialValues]);
+  }, [initialValues, reset]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({ title, content, priority });
-    setTitle("");
-    setContent("");
-    setPriority("normal");
+  const handleFormSubmit = (data: TaskFormValues) => {
+    onSubmit(data);
+    reset({ title: "", content: "", priority: "Normal" });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(handleFormSubmit)}
+        className="space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div>
-        <Label htmlFor="content">Content</Label>
-        <Textarea
-          id="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          required
+        <FormField
+          control={form.control}
+          name="content"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Content</FormLabel>
+              <FormControl>
+                <Textarea {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div>
-        <Label htmlFor="priority">Priority</Label>
-        <Select value={priority} onValueChange={setPriority}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Normal">Normal</SelectItem>
-            <SelectItem value="Medium">Medium</SelectItem>
-            <SelectItem value="High">High</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <Button type="submit">
-        {initialValues ? "Update Task" : "Create Task"}
-      </Button>
-    </form>
+
+        <FormField
+          control={form.control}
+          name="priority"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Priority</FormLabel>
+              <FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Normal">Normal</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit">
+          {initialValues ? "Update Task" : "Create Task"}
+        </Button>
+      </form>
+    </Form>
   );
 };
