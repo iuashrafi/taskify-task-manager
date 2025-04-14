@@ -93,9 +93,9 @@ export const KanbanColumn = ({
                   columnId={column._id}
                   initialTitle={column.title}
                   trigger={
-                    <span className="w-full cursor-pointer text-sm px-2">
+                    <div className="hover:bg-gray-100 w-full cursor-pointer text-sm px-2 py-1 rounded-md">
                       Rename
-                    </span>
+                    </div>
                   }
                   // @ts-ignore
                   onUpdate={(newTitle) => {
