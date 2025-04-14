@@ -1,10 +1,17 @@
 import { useSortable } from "@dnd-kit/sortable";
-import { CardHeader } from "../ui/card";
-import { GripVertical } from "lucide-react";
+import { Card } from "../ui/card";
+import { Flag, GripVertical, Pencil, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { CSS } from "@dnd-kit/utilities";
+import { Task } from "@/lib/types";
+import { CreateTaskModal } from "./create-task-modal";
+import { deleteTask, updateTask } from "@/lib/api";
 
-export const KanbanTaskItem = ({ task }: any) => {
+interface KanbanTaskItemProps {
+  task: Task;
+}
+
+export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
   const {
     setNodeRef,
     attributes,
@@ -26,23 +33,98 @@ export const KanbanTaskItem = ({ task }: any) => {
   };
 
   return (
-    <div
+    <Card
       ref={setNodeRef}
       style={style}
-      className={`p-4 border my-2 ${isDragging ? "opacity-30" : ""}`}
+      className={`bg-white !shadow-sm border-none rounded-sm py-0.5 px-2 gap-1 ${
+        isDragging ? "opacity-30" : ""
+      }`}
     >
-      <CardHeader className="px-3 py-3 space-between flex flex-row  relative">
+      <div className="px-0 py-2 flex items-center relative border-b-2 border-dotted border-gray-200 mb-1">
         <Button
           variant={"ghost"}
           {...attributes}
           {...listeners}
-          className="p-1 text-secondary-foreground/50 -ml-2 h-auto cursor-grab"
+          className="!p-1 text-secondary-foreground/50 -ml-1 h-auto cursor-grab"
         >
-          <span className="sr-only">Move task</span>
-          <GripVertical />
+          <GripVertical size={14} />
         </Button>
-        <div>{task.content}</div>
-      </CardHeader>
+        <div className="ml-1 text-sm font-semibold">{task.title}</div>
+        <div className="ml-auto flex space-x-1">
+          <CreateTaskModal
+            task={{
+              id: task.id.toString(),
+              title: task.title,
+              content: task.content,
+              priority: task.priority ?? "Normal",
+            }}
+            onUpdateTask={(taskId, title, content, priority) => {
+              console.log("Update", taskId, title, content, priority);
+              updateTask(taskId, { title, content, priority }).catch(
+                (error) => {
+                  console.error("Failed to update task:", error);
+                }
+              );
+            }}
+            trigger={
+              <Button
+                variant="ghost"
+                className="!p-1 h-auto cursor-pointer ml-auto"
+              >
+                <Pencil size={14} className="text-gray-600" />
+              </Button>
+            }
+          />
+          <Button
+            variant="ghost"
+            className="bg-red-50 !p-1 h-auto"
+            onClick={() => {
+              const confirmed = window.confirm(
+                "Are you sure you want to delete this task?"
+              );
+              if (confirmed) {
+                deleteTask(task.id.toString())
+                  .then(() => {
+                    // Call your refetch or update local state
+                    // refetchTasks(); // or remove it from local state
+                  })
+                  .catch((error: any) => {
+                    console.error("Failed to delete task:", error);
+                  });
+              }
+            }}
+          >
+            <Trash2 size={14} className="text-red-500" />
+          </Button>
+        </div>
+      </div>
+      <div className="px-1 pb-2">
+        <p className="text-sm">{task.content ?? ""} </p>
+        <div className="mt-2">
+          <PriorityFlag level={task.priority} />
+        </div>
+      </div>
+    </Card>
+  );
+};
+
+const PriorityFlag = ({ level }: { level: string | undefined }) => {
+  if (!level) level = "Normal";
+  let fillColor = "";
+  if (!level || level === "Normal") {
+    level = "Normal";
+    fillColor = "text-blue-500 fill-blue-500";
+  } else if (level === "Medium") {
+    fillColor = "text-green-500 fill-green-500";
+  } else {
+    // high priority
+    fillColor = "text-red-500 fill-red-500";
+  }
+
+  return (
+    <div className="flex items-center space-x-1">
+      <Flag size={14} className={` ${fillColor}`} />
+      <span className="text-xs font-light">{level}</span>
     </div>
   );
 };

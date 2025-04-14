@@ -1,28 +1,32 @@
-import { Button } from "@/components/ui/button";
-import { Calendar, Clock12, Columns3, Files, List } from "lucide-react";
-import { NavLink, Outlet } from "react-router";
+import { Columns3 } from "lucide-react";
+import { Navigate, NavLink, Outlet } from "react-router";
 
 import { AppSidebar } from "@/components/blocks/app-sidebar";
 
 import { SiteHeader } from "@/components/blocks/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-
-import { useState } from "react";
+import { useAuthContext } from "@/context/AuthContext";
 
 const DashboardLayout = () => {
-  const [project, setProject] = useState({
-    name: "Untitled",
-  });
+  const { user, loading } = useAuthContext();
+
+  if (loading) {
+    return <div>loading...</div>;
+  }
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
   return (
     <>
       <SidebarProvider>
         <AppSidebar variant="sidebar" />
         <SidebarInset>
-          <SiteHeader title={project.name} />
-          <div className="flex flex-1 flex-col bg-red-200">
+          <SiteHeader title={user.projectName ?? "Untitled"} />
+          <div className="flex flex-1 flex-col bg-white">
             <div className="@container/main flex flex-1 flex-col gap-2">
-              <div className="flex flex-col gap-4 py-2 md:gap-6 md:py-2">
+              <div className="flex flex-col">
                 <div className="px-4 lg:px-6">
                   <DashboardNav />
                 </div>
@@ -38,10 +42,22 @@ const DashboardLayout = () => {
 
 export default DashboardLayout;
 
-const DashboardNav = () => (
+export const DashboardNav = () => (
   <nav>
-    <ul className="flex space-x-6 text-sm border-b border-b-[#e3e3e3] pb-1.5">
-      <li>
+    <ul className="flex space-x-6 text-sm border-b border-b-[#e3e3e3] ">
+      <li className="">
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) =>
+            `flex space-x-1 items-center pb-2 -mt-[2px] border-b-2
+            ${isActive ? "border-primary text-primary" : "border-transparent"}`
+          }
+        >
+          <Columns3 size={16} />
+          <span>Board</span>
+        </NavLink>
+      </li>
+      {/* <li>
         <NavLink
           to="/dashboard/overview"
           className="flex space-x-1 items-center"
@@ -55,20 +71,7 @@ const DashboardNav = () => (
           <List size={18} />
           <span>List</span>
         </NavLink>
-      </li>
-      <li>
-        <NavLink
-          to="/dashboard/board"
-          className={({ isActive }) =>
-            isActive
-              ? "border-b-2 border-indigo-500 flex space-x-1 items-center"
-              : "flex space-x-1 items-center"
-          }
-        >
-          <Columns3 size={18} />
-          <span>Board</span>
-        </NavLink>
-      </li>
+      </li> */}
     </ul>
   </nav>
 );

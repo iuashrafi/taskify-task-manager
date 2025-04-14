@@ -12,6 +12,7 @@ export interface User {
   userId: string;
   username: string;
   email?: string;
+  projectName?: string;
 }
 
 interface AuthContextProps {
@@ -49,9 +50,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await api.get("/auth/user", {
-          withCredentials: true,
-        });
+        const res = await api.get("/auth/user");
+        console.log("user data = ", res.data);
         setUser(res.data);
       } catch (error) {
         setUser(null);

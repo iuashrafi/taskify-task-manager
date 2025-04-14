@@ -6,147 +6,100 @@ import {
   DragStartEvent,
 } from "@dnd-kit/core";
 
-// import { Droppable } from "./Droppable";
-// import { Draggable } from "./Draggable";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { arrayMove, SortableContext } from "@dnd-kit/sortable";
 
 import { Column, Task } from "@/lib/types";
 import { KanbanColumn } from "./KanbanColumn";
+import {
+  createTask,
+  reorderTasksInColumn,
+  updateColumnOrder,
+  updateTask,
+} from "@/lib/api";
 
-const initialTasks: Task[] = [
-  {
-    id: "task1",
-    columnId: "done",
-    content: "Project initiation and planning",
-  },
-  {
-    id: "task2",
-    columnId: "done",
-    content: "Gather requirements from stakeholders",
-  },
-  {
-    id: "task3",
-    columnId: "done",
-    content: "Create wireframes and mockups",
-  },
-  {
-    id: "task4",
-    columnId: "in-progress",
-    content: "Develop homepage layout",
-  },
-  {
-    id: "task5",
-    columnId: "in-progress",
-    content: "Design color scheme and typography",
-  },
-  {
-    id: "task6",
-    columnId: "todo",
-    content: "Implement user authentication",
-  },
-  {
-    id: "task7",
-    columnId: "todo",
-    content: "Build contact us page",
-  },
-  {
-    id: "task8",
-    columnId: "todo",
-    content: "Create product catalog",
-  },
-  {
-    id: "task9",
-    columnId: "todo",
-    content: "Develop about us page",
-  },
-  {
-    id: "task10",
-    columnId: "todo",
-    content: "Optimize website for mobile devices",
-  },
-  {
-    id: "task11",
-    columnId: "todo",
-    content: "Integrate payment gateway",
-  },
-  {
-    id: "task12",
-    columnId: "todo",
-    content: "Perform testing and bug fixing",
-  },
-  {
-    id: "task13",
-    columnId: "todo",
-    content: "Launch website and deploy to server",
-  },
-];
+interface KanbanBoardProps {
+  initialColumns: Column[];
+}
 
-const defaultColumns: Column[] = [
-  {
-    id: "todo" as const,
-    title: "Todo",
-  },
-  {
-    id: "in-progress" as const,
-    title: "In progress",
-  },
-  {
-    id: "done" as const,
-    title: "Done",
-  },
-];
-
-export function KanbanBoard() {
-  const [columns, setColumns] = useState<Column[]>(defaultColumns);
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+export function KanbanBoard({ initialColumns }: KanbanBoardProps) {
+  const [columns, setColumns] = useState<Column[]>(initialColumns);
+  const [tasks, setTasks] = useState<Task[]>(
+    initialColumns.flatMap((col) => col.tasks || [])
+  );
 
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
 
+  // @ts-ignore
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
-  // const [activeTask, setActiveTask] = useState<Task | null>(null);
+  // @ts-ignore
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   useEffect(() => {
     console.log("columns = ", columns);
-  }, [columns]);
+    console.log("tasks = ", tasks);
+  }, [columns, tasks]);
+
+  // Update tasks whenever initialColumns changes
+  useEffect(() => {
+    setTasks(initialColumns.flatMap((column) => column.tasks || []));
+  }, [initialColumns]);
 
   const handleDragStart = (event: DragStartEvent) => {
-    console.log("draggingg.... (started)");
-    console.log(`drag start end  = `, event);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    console.log(`Dragging ended`);
-    console.log(`drag end event = `, event);
-
-    setActiveColumn(null);
-    // setActiveTask(null);
-
-    const { active, over } = event;
-    if (!over) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    // if (!hasDraggableData(active)) return;
-
+    const { active } = event;
     const activeData = active.data.current;
 
-    if (activeId === overId) return;
+    if (activeData?.type === "Column") {
+      setActiveColumn(activeData.column);
+      return;
+    }
 
-    const isActiveAColumn = activeData?.type === "Column";
-    if (!isActiveAColumn) return;
-
-    setColumns((columns) => {
-      const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
-
-      const overColumnIndex = columns.findIndex((col) => col.id === overId);
-
-      return arrayMove(columns, activeColumnIndex, overColumnIndex);
-    });
+    if (activeData?.type === "Task") {
+      setActiveTask(activeData.task);
+      return;
+    }
   };
 
-  const handleDragOver = (event: DragOverEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
+    setActiveColumn(null);
+    setActiveTask(null);
+
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+    if (activeId === overId) return;
+
+    const activeData = active.data.current;
+    if (!activeData) return;
+
+    // Column reordering
+    if (activeData.type === "Column") {
+      const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
+      const overColumnIndex = columns.findIndex((col) => col.id === overId);
+
+      if (activeColumnIndex !== overColumnIndex) {
+        const newColumns = arrayMove(
+          columns,
+          activeColumnIndex,
+          overColumnIndex
+        );
+        setColumns(newColumns);
+
+        try {
+          await updateColumnOrder(newColumns);
+        } catch (error: any) {
+          console.error("Failed to update column order:", error);
+          // Revert if API call fails
+          setColumns(columns);
+          alert(`Failed to save column order: ${error.message}`);
+        }
+      }
+    }
+  };
+
+  const handleDragOver = async (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
 
@@ -154,50 +107,116 @@ export function KanbanBoard() {
     const overId = over.id;
 
     if (activeId === overId) return;
-
-    // if (!hasDraggableData(active) || !hasDraggableData(over)) return;
 
     const activeData = active.data.current;
     const overData = over.data.current;
 
-    const isActiveATask = activeData?.type === "Task";
-    const isOverATask = overData?.type === "Task";
+    if (!activeData) return;
 
-    if (!isActiveATask) return;
-
-    // Im dropping a Task over another Task
-    if (isActiveATask && isOverATask) {
+    // dropping a Task over another Task
+    if (activeData.type === "Task" && overData?.type === "Task") {
       setTasks((tasks) => {
         const activeIndex = tasks.findIndex((t) => t.id === activeId);
         const overIndex = tasks.findIndex((t) => t.id === overId);
+
         const activeTask = tasks[activeIndex];
         const overTask = tasks[overIndex];
-        if (
-          activeTask &&
-          overTask &&
-          activeTask.columnId !== overTask.columnId
-        ) {
-          activeTask.columnId = overTask.columnId;
-          return arrayMove(tasks, activeIndex, overIndex - 1);
+
+        if (!activeTask || !overTask) return tasks;
+
+        // If moving to different column
+        if (activeTask.columnId !== overTask.columnId) {
+          const updatedTask = {
+            ...activeTask,
+            columnId: overTask.columnId,
+            column: overTask.columnId.toString(), // converted to string to fix type error
+          };
+
+          updateTask(activeTask._id || activeTask.id.toString(), {
+            column: overTask.columnId.toString(),
+          }).catch((error) => {
+            console.error("Failed to update task:", error);
+          });
+
+          return [
+            ...tasks.slice(0, activeIndex),
+            ...tasks.slice(activeIndex + 1),
+            updatedTask,
+          ];
         }
 
-        return arrayMove(tasks, activeIndex, overIndex);
+        // Same column reordering
+        const newTasks = arrayMove(tasks, activeIndex, overIndex);
+
+        reorderTasksInColumn(
+          overTask.columnId.toString(),
+          newTasks
+            .filter((t) => t.columnId === overTask.columnId)
+            .map((t) => t._id || t.id.toString())
+        ).catch(console.error);
+
+        return newTasks;
       });
     }
 
-    const isOverAColumn = overData?.type === "Column";
-
-    // Im dropping a Task over a column
-    if (isActiveATask && isOverAColumn) {
+    // dropping a Task over a column
+    if (activeData.type === "Task" && overData?.type === "Column") {
       setTasks((tasks) => {
         const activeIndex = tasks.findIndex((t) => t.id === activeId);
         const activeTask = tasks[activeIndex];
-        if (activeTask) {
-          activeTask.columnId = overId as string; // as ColumnId
-          return arrayMove(tasks, activeIndex, activeIndex);
+
+        if (!activeTask) return tasks;
+
+        if (activeTask.columnId !== overId) {
+          const updatedTask = {
+            ...activeTask,
+            columnId: overId as string,
+            column: overId as string,
+          };
+
+          updateTask(activeTask._id || activeTask.id.toString(), {
+            column: overId.toString(),
+          }).catch((error) => {
+            console.error("Failed to update task:", error);
+          });
+
+          return [
+            ...tasks.slice(0, activeIndex),
+            ...tasks.slice(activeIndex + 1),
+            updatedTask,
+          ];
         }
+
         return tasks;
       });
+    }
+  };
+
+  const onAddTask = async (
+    columnId: string | undefined,
+    title: string,
+    content: string,
+    priority: string
+  ) => {
+    const newTask = {
+      title,
+      content,
+      columnId,
+      priority,
+    };
+
+    try {
+      const createdTask = await createTask(newTask);
+      setTasks((prev) => [
+        ...prev,
+        {
+          ...createdTask,
+          id: createdTask._id || createdTask.id,
+          columnId: createdTask.column || createdTask.columnId,
+        },
+      ]);
+    } catch (error) {
+      console.error("Failed to create task:", error);
     }
   };
 
@@ -214,6 +233,7 @@ export function KanbanBoard() {
               key={col.id}
               column={col}
               tasks={tasks.filter((task: any) => task.columnId === col.id)}
+              onAddTask={onAddTask}
             />
           ))}
         </SortableContext>
@@ -225,7 +245,9 @@ export function KanbanBoard() {
 const BoardContainer = ({ children }: any) => {
   return (
     <ScrollArea>
-      <div className="bg-indigo-200 flex gap-6 p-4 scroll-auto">{children}</div>
+      <div className="bg-white flex gap-6 p-4 scroll-auto items-start h-full">
+        {children}
+      </div>
       <ScrollBar orientation="horizontal" />
     </ScrollArea>
   );
