@@ -5,6 +5,7 @@ const {
   deleteTask,
   renameProject,
   updateTask,
+  reorderTasksWithinCol,
 } = require("../controllers/taskController");
 
 router.post("/", createTask);
