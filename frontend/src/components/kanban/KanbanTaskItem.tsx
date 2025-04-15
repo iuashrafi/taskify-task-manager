@@ -7,6 +7,7 @@ import { Task } from "@/lib/types";
 import { CreateTaskModal } from "./create-task-modal";
 import { deleteTask, updateTask } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 interface KanbanTaskItemProps {
   task: Task;
@@ -54,6 +55,7 @@ export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
         <div className="ml-1 text-sm font-semibold">{task.title}</div>
         <div className="ml-auto flex space-x-1">
           <CreateTaskModal
+            modalTitle="Edit Task"
             task={{
               id: task.id.toString(),
               title: task.title,
@@ -87,10 +89,12 @@ export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
               if (confirmed) {
                 deleteTask(task.id.toString())
                   .then(() => {
+                    toast.success("Task deleted");
                     queryClient.invalidateQueries({ queryKey: ["columns"] });
                   })
                   .catch((error: any) => {
                     console.error("Failed to delete task:", error);
+                    toast.error("Error deleting task");
                   });
               }
             }}

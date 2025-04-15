@@ -12,33 +12,10 @@ import { Button } from "@/components/ui/button";
 import { CreateTaskForm } from "./create-task-form";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-
-interface CreateTaskModalInterface {
-  columnId?: string | undefined;
-  task?: {
-    id: string;
-    title: string;
-    content: string;
-    priority: string;
-  };
-  onAddTask?: (
-    columnId: string | undefined,
-    title: string,
-    content: string,
-    priority: string
-  ) => void;
-
-  onUpdateTask?: (
-    taskId: string,
-    title: string,
-    content: string,
-    priority: string
-  ) => void;
-
-  trigger?: React.ReactNode;
-}
+import { CreateTaskModalInterface } from "@/lib/types";
 
 export const CreateTaskModal = ({
+  modalTitle,
   columnId,
   task,
   onAddTask,
@@ -50,12 +27,6 @@ export const CreateTaskModal = ({
 
   const handleSubmit = (data: any) => {
     if (task && onUpdateTask) {
-      console.log("updating task : ", {
-        id: task.id,
-        title: data.title,
-        content: data.content,
-        priority: data.priority,
-      });
       onUpdateTask(task.id, data.title, data.content, data.priority);
       queryClient.invalidateQueries({
         queryKey: ["columns"],
@@ -74,7 +45,7 @@ export const CreateTaskModal = ({
       <DialogTrigger asChild>
         <DialogTrigger asChild>
           {trigger ?? (
-            <Button variant="ghost" className="!p-1  h-auto">
+            <Button variant="ghost" className="!p-1 h-auto">
               <Plus size={16} />
             </Button>
           )}
@@ -82,7 +53,7 @@ export const CreateTaskModal = ({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{task ? "Edit Task" : "Create a new task"}</DialogTitle>
+          <DialogTitle>{modalTitle}</DialogTitle>
         </DialogHeader>
         <CreateTaskForm
           onSubmit={handleSubmit}

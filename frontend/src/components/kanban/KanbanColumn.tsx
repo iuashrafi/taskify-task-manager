@@ -127,7 +127,11 @@ export const KanbanColumn = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <CreateTaskModal columnId={column._id} onAddTask={onAddTask} />
+          <CreateTaskModal
+            modalTitle="Create new Task"
+            columnId={column._id}
+            onAddTask={onAddTask}
+          />
         </div>
       </CardHeader>
 

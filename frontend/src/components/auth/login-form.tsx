@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -16,15 +15,7 @@ import {
 } from "@/components/ui/form";
 import { useAuthContext } from "@/context/AuthContext";
 import toast from "react-hot-toast";
-
-const LoginFormSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
-});
-
-type LoginFormValues = z.infer<typeof LoginFormSchema>;
+import { LoginFormValues, LoginFormSchema } from "@/lib/types";
 
 export function LoginForm({
   className,

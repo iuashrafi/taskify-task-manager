@@ -9,7 +9,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -20,16 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
-const TaskFormSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  content: z.string().min(1, { message: "Content is required" }),
-  priority: z.enum(["Normal", "Medium", "High"], {
-    required_error: "Priority is required",
-  }),
-});
-
-type TaskFormValues = z.infer<typeof TaskFormSchema>;
+import { TaskFormSchema, TaskFormValues } from "@/lib/types";
 
 interface CreateTaskFormProps {
   onSubmit: (data: TaskFormValues) => void;
@@ -81,6 +71,7 @@ export const CreateTaskForm = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="content"

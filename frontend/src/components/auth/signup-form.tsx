@@ -13,19 +13,9 @@ import {
 } from "@/components/ui/form";
 import { useAuthContext } from "@/context/AuthContext";
 import toast from "react-hot-toast";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-const SignupFormSchema = z.object({
-  username: z.string().min(3),
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
-});
-
-type SignupFormValues = z.infer<typeof SignupFormSchema>;
+import { SignupFormSchema, SignupFormValues } from "@/lib/types";
 
 export function SignupForm({
   className,
@@ -61,6 +51,7 @@ export function SignupForm({
             Enter your email below to login to your account
           </p>
         </div>
+
         <FormField
           control={form.control}
           name="username"
