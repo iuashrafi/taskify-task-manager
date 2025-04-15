@@ -5,17 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { useAuthContext } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import { LoginFormValues, LoginFormSchema } from "@/lib/types";
+import FormFieldWrapper from "../custom-forms/form-field-wrapper";
 
 export function LoginForm({
   className,
@@ -50,32 +44,23 @@ export function LoginForm({
             Enter your email below to login to your account
           </p>
         </div>
-        <FormField
-          control={form.control}
+
+        <FormFieldWrapper
           name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="imtiaz@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
+          label="Email"
+          placeholder="imtiaz@example.com"
           control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} placeholder="Password" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          renderInput={(field) => <Input {...field} />}
         />
+
+        <FormFieldWrapper
+          name="password"
+          label="Password"
+          placeholder="Password"
+          control={form.control}
+          renderInput={(field) => <Input {...field} type="password" />}
+        />
+
         <Button type="submit" className="w-full">
           Login
         </Button>

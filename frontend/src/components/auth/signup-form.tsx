@@ -3,19 +3,13 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { useAuthContext } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignupFormSchema, SignupFormValues } from "@/lib/types";
+import FormFieldWrapper from "../custom-forms/form-field-wrapper";
 
 export function SignupForm({
   className,
@@ -52,45 +46,30 @@ export function SignupForm({
           </p>
         </div>
 
-        <FormField
-          control={form.control}
+        <FormFieldWrapper
           name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="imtiaz" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
+          label="Username"
+          placeholder="imtiaz"
           control={form.control}
+          renderInput={(field) => <Input {...field} />}
+        />
+
+        <FormFieldWrapper
           name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="imtiaz@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
+          label="Email"
+          placeholder="imtiaz@example.com"
           control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} placeholder="Password" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          renderInput={(field) => <Input {...field} />}
         />
+
+        <FormFieldWrapper
+          name="password"
+          label="Password"
+          placeholder="Password"
+          control={form.control}
+          renderInput={(field) => <Input {...field} type="password" />}
+        />
+
         <Button type="submit" className="w-full">
           Sign up
         </Button>

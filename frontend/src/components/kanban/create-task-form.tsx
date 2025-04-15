@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { TaskFormSchema, TaskFormValues } from "@/lib/types";
+import FormFieldWrapper from "../custom-forms/form-field-wrapper";
 
 interface CreateTaskFormProps {
   onSubmit: (data: TaskFormValues) => void;
@@ -58,32 +59,18 @@ export const CreateTaskForm = ({
         onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-4"
       >
-        <FormField
-          control={form.control}
+        <FormFieldWrapper
           name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Title"
+          control={form.control}
+          renderInput={(field) => <Input {...field} type="text" />}
         />
 
-        <FormField
-          control={form.control}
+        <FormFieldWrapper
           name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Content</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Content"
+          control={form.control}
+          renderInput={(field) => <Textarea {...field} />}
         />
 
         <FormField
