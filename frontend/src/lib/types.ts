@@ -20,6 +20,21 @@ export interface Column {
   tasks?: Task[];
 }
 
+export interface KanbanColumnProps {
+  column: Column;
+  tasks: Task[];
+  onAddTask: (
+    columnId: string | undefined,
+    title: string,
+    content: string,
+    priority: string
+  ) => void;
+}
+
+export interface KanbanTaskItemProps {
+  task: Task;
+}
+
 export interface CreateTaskModalInterface {
   modalTitle: string;
   columnId?: string | undefined;
@@ -47,6 +62,7 @@ export interface CreateTaskModalInterface {
 }
 
 // Form Schemas
+
 export const LoginFormSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z

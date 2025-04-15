@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "../ui/card";
 import { Ellipsis, GripVertical } from "lucide-react";
 import { Button } from "../ui/button";
 import { CSS } from "@dnd-kit/utilities";
-import { Column, Task } from "@/lib/types";
+import { KanbanColumnProps, Task } from "@/lib/types";
 import { KanbanTaskItem } from "./KanbanTaskItem";
 import { CreateTaskModal } from "./create-task-modal";
 import { deleteColumn } from "@/lib/api";
@@ -19,17 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useQueryClient } from "@tanstack/react-query";
 
-interface KanbanColumnProps {
-  column: Column;
-  tasks: Task[];
-  onAddTask: (
-    columnId: string | undefined,
-    title: string,
-    content: string,
-    priority: string
-  ) => void;
-}
-
 export const KanbanColumn = ({
   column,
   tasks,
@@ -37,7 +26,7 @@ export const KanbanColumn = ({
 }: KanbanColumnProps) => {
   const queryClient = useQueryClient();
   const tasksIds = useMemo(() => {
-    return tasks.map((task: any) => task.id);
+    return tasks.map((task: Task) => task.id);
   }, [tasks]);
 
   const {
@@ -55,15 +44,13 @@ export const KanbanColumn = ({
     },
   });
 
-  const style = {
-    transition,
-    transform: CSS.Translate.toString(transform),
-  };
-
   return (
     <Card
       ref={setNodeRef}
-      style={style}
+      style={{
+        transition,
+        transform: CSS.Translate.toString(transform),
+      }}
       className={`gap-2 border-none shadow-none p-2 w-[250px] bg-[#f2f5f5] flex flex-col ${
         isDragging ? "opacity-50 z-0" : ""
       }`}

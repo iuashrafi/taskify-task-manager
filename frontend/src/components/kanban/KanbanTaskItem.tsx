@@ -3,15 +3,11 @@ import { Card } from "../ui/card";
 import { Flag, GripVertical, Pencil, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { CSS } from "@dnd-kit/utilities";
-import { Task } from "@/lib/types";
+import { KanbanTaskItemProps } from "@/lib/types";
 import { CreateTaskModal } from "./create-task-modal";
 import { deleteTask, updateTask } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-
-interface KanbanTaskItemProps {
-  task: Task;
-}
 
 export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
   const queryClient = useQueryClient();
@@ -30,15 +26,30 @@ export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
     },
   });
 
-  const style = {
-    transition,
-    transform: CSS.Translate.toString(transform),
+  const handleDeleteTask = () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+    if (confirmed) {
+      deleteTask(task.id.toString())
+        .then(() => {
+          toast.success("Task deleted");
+          queryClient.invalidateQueries({ queryKey: ["columns"] });
+        })
+        .catch((error: any) => {
+          console.error("Failed to delete task:", error);
+          toast.error("Error deleting task");
+        });
+    }
   };
 
   return (
     <Card
       ref={setNodeRef}
-      style={style}
+      style={{
+        transition,
+        transform: CSS.Translate.toString(transform),
+      }}
       className={`bg-white !shadow-sm border-none rounded-sm py-0.5 px-2 gap-1 ${
         isDragging ? "opacity-30" : ""
       }`}
@@ -63,10 +74,10 @@ export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
               priority: task.priority ?? "Normal",
             }}
             onUpdateTask={(taskId, title, content, priority) => {
-              console.log("Update", taskId, title, content, priority);
               updateTask(taskId, { title, content, priority }).catch(
                 (error) => {
                   console.error("Failed to update task:", error);
+                  toast.error("Failed to update task!");
                 }
               );
             }}
@@ -82,22 +93,7 @@ export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
           <Button
             variant="ghost"
             className="bg-red-50 !p-1 h-auto"
-            onClick={() => {
-              const confirmed = window.confirm(
-                "Are you sure you want to delete this task?"
-              );
-              if (confirmed) {
-                deleteTask(task.id.toString())
-                  .then(() => {
-                    toast.success("Task deleted");
-                    queryClient.invalidateQueries({ queryKey: ["columns"] });
-                  })
-                  .catch((error: any) => {
-                    console.error("Failed to delete task:", error);
-                    toast.error("Error deleting task");
-                  });
-              }
-            }}
+            onClick={handleDeleteTask}
           >
             <Trash2 size={14} className="text-red-500" />
           </Button>

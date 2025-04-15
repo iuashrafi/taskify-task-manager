@@ -215,16 +215,6 @@ export function KanbanBoard({ initialColumns }: KanbanBoardProps) {
     try {
       await createTask(newTask);
       toast.success("Task created!");
-      // setTasks((prev) => [
-      //   ...prev,
-      //   {
-      //     ...createdTask,
-      //     id: createdTask._id || createdTask.id,
-      //     columnId: createdTask.column || createdTask.columnId,
-      //   },
-      // ]);
-
-      // instead - invalidate it
       queryClient.invalidateQueries({
         queryKey: ["columns"],
       });
