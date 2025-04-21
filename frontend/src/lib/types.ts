@@ -10,6 +10,7 @@ export interface Task {
   is_completed?: boolean;
   order?: number;
   priority?: string;
+  dueDate?: string;
 }
 
 export interface Column {
@@ -27,7 +28,8 @@ export interface KanbanColumnProps {
     columnId: string | undefined,
     title: string,
     content: string,
-    priority: string
+    priority: string,
+    dueDate: string
   ) => void;
 }
 
@@ -43,12 +45,14 @@ export interface CreateTaskModalInterface {
     title: string;
     content: string;
     priority: string;
+    dueDate: string;
   };
   onAddTask?: (
     columnId: string | undefined,
     title: string,
     content: string,
-    priority: string
+    priority: string,
+    dueDate: string
   ) => void;
 
   onUpdateTask?: (
@@ -88,6 +92,7 @@ export const TaskFormSchema = z.object({
   priority: z.enum(["Normal", "Medium", "High"], {
     required_error: "Priority is required",
   }),
+  dueDate: z.string(),
 });
 
 export type TaskFormValues = z.infer<typeof TaskFormSchema>;

@@ -37,6 +37,7 @@ export const CreateTaskForm = ({
       title: initialValues?.title ?? "",
       content: initialValues?.content ?? "",
       priority: initialValues?.priority ?? "Normal",
+      dueDate: new Date().toISOString(),
     },
   });
 
@@ -97,6 +98,13 @@ export const CreateTaskForm = ({
               <FormMessage />
             </FormItem>
           )}
+        />
+
+        <FormFieldWrapper
+          name="dueDate"
+          label="Due Date"
+          control={form.control}
+          renderInput={(field) => <Input {...field} type="date" />}
         />
 
         <Button type="submit">

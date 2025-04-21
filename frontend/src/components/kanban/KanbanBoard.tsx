@@ -203,16 +203,19 @@ export function KanbanBoard({ initialColumns }: KanbanBoardProps) {
     columnId: string | undefined,
     title: string,
     content: string,
-    priority: string
+    priority: string,
+    dueDate: string
   ) => {
     const newTask = {
       title,
       content,
       columnId,
       priority,
+      dueDate,
     };
 
     try {
+      console.log("new task data sending to backend=", newTask);
       await createTask(newTask);
       toast.success("Task created!");
       queryClient.invalidateQueries({

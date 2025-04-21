@@ -32,7 +32,13 @@ export const CreateTaskModal = ({
         queryKey: ["columns"],
       });
     } else if (onAddTask) {
-      onAddTask(columnId, data.title, data.content, data.priority);
+      onAddTask(
+        columnId,
+        data.title,
+        data.content,
+        data.priority,
+        data.dueDate
+      );
       queryClient.invalidateQueries({
         queryKey: ["columns"],
       });
@@ -63,6 +69,7 @@ export const CreateTaskModal = ({
                   title: task.title,
                   content: task.content,
                   priority: task.priority as "Normal" | "Medium" | "High",
+                  dueDate: task.dueDate,
                 }
               : undefined
           }

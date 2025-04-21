@@ -25,6 +25,9 @@ const TaskSchema = new mongoose.Schema({
     enum: ["Normal", "Medium", "High"],
     default: "Normal",
   },
+  due_date: {
+    type: Date,
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

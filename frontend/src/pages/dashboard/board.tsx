@@ -14,17 +14,20 @@ const fetchColumns = async () => {
     _id: column._id,
     title: column.title,
     order: column.order,
-    tasks: column.tasks.map((task: any) => ({
-      id: task._id,
-      _id: task._id,
-      title: task.title,
-      content: task.content,
-      columnId: column._id,
-      column: task.column,
-      is_completed: task.is_completed,
-      order: task.order,
-      priority: task.priority,
-    })),
+    tasks: column.tasks.map((task: any) => {
+      return {
+        id: task._id,
+        _id: task._id,
+        title: task.title,
+        content: task.content,
+        columnId: column._id,
+        column: task.column,
+        is_completed: task.is_completed,
+        order: task.order,
+        priority: task.priority,
+        dueDate: task.due_date,
+      };
+    }),
   }));
 };
 

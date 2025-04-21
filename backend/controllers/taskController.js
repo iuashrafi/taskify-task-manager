@@ -5,8 +5,10 @@ exports.createTask = async (req, res) => {
   try {
     const { userId } = req.user;
 
-    const { title, content, columnId, priority } = req.body;
+    const { title, content, columnId, priority, dueDate } = req.body;
 
+
+    console.log("data received = " , { title, content, columnId, priority, dueDate } );
     const column = await ColumnModel.findOne({ _id: columnId, user: userId });
     if (!column) {
       throw new Error("Column doesnt exists!");
@@ -21,11 +23,14 @@ exports.createTask = async (req, res) => {
       order: taskCount,
       priority,
       user: userId,
+      due_date : dueDate
     });
 
     await task.save();
 
     res.status(201).json(task);
+
+  
   } catch (error) {
     console.log("error creating task in db", error);
     res.status(500).json({

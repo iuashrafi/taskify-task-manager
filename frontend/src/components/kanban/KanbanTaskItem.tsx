@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { Card } from "../ui/card";
-import { Flag, GripVertical, Pencil, Trash2 } from "lucide-react";
+import { Calendar, Flag, GripVertical, Pencil, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { CSS } from "@dnd-kit/utilities";
 import { KanbanTaskItemProps } from "@/lib/types";
@@ -72,6 +72,7 @@ export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
               title: task.title,
               content: task.content,
               priority: task.priority ?? "Normal",
+              dueDate: task.dueDate ?? new Date().toISOString(),
             }}
             onUpdateTask={(taskId, title, content, priority) => {
               updateTask(taskId, { title, content, priority }).catch(
@@ -101,6 +102,14 @@ export const KanbanTaskItem = ({ task }: KanbanTaskItemProps) => {
       </div>
       <div className="px-1 pb-2">
         <p className="text-sm">{task.content ?? ""} </p>
+        {task.dueDate && (
+          <div className="mt-2 flex items-center space-x-1">
+            <Calendar size={14} />
+            <span className="text-xs font-light">
+              {task.dueDate.split("T")[0]}
+            </span>
+          </div>
+        )}
         <div className="mt-2">
           <PriorityFlag level={task.priority} />
         </div>
